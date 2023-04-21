@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     CountDownTimer workoutTimer, restTimer;
 
     boolean workoutCountDown = false, restCountDown = false;
-    static boolean cancel = false;
+
 
     int i = 0;
 
@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
                         startButton.setBackgroundColor(Color.GRAY);
                         startButton.setTextColor(Color.BLACK);
                         startButton.setText("START");
-
                         stopButton.setClickable(true);
                         stopButton.setBackgroundColor(Color.parseColor("#A52A2A"));
                         stopButton.setTextColor(Color.WHITE);
@@ -87,17 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
                         int progress = (int) (100 - (mSecondsLeft * 100) / (workoutDuration));
                         progressBar.setProgress(progress);
-                        if (cancel == true) {
-                            restTimer.cancel();
-                            workoutTimer.cancel();
-                            workoutCountDown = false;
-                            restCountDown = false;
-                            cancel = false;
-                            startButton.setClickable(true);
-                            startButton.setBackgroundColor(Color.parseColor("#228B22"));
-                            startButton.setTextColor(Color.WHITE);
 
-                        }
 
                     }
 
@@ -118,44 +107,29 @@ public class MainActivity extends AppCompatActivity {
 
                         restTimer = new CountDownTimer(restDuration + 50, 1000) {
                             @Override
-                            public void onTick(long millisUntilFinished) {
-                                long minutes = (millisUntilFinished / 60000) % 60;
-                                long seconds = (millisUntilFinished / 1000) % 60;
+                            public void onTick(long mSecLeft) {
+                                long minutes = (mSecLeft/60000)%60;
+                                long seconds = (mSecLeft/1000)%60;
 
                                 restCountDown = true;
 
-                                //update user view for countdown timer and progress bar
                                 countDownTimer.setText(String.format("%02d:%02d", minutes, seconds));
 
-                                int progress = (int) (100 - (millisUntilFinished * 100) / (restDuration));
+                                int progress = (int)(100-(mSecLeft*100)/(restDuration));
                                 progressBar.setProgress(progress);
 
-                                //if cancel is pressed from the notification, cancel the timers and allow start to be pressed again
-                                if (cancel == true) {
-                                    restTimer.cancel();
-                                    workoutTimer.cancel();
-                                    workoutCountDown = false;
-                                    restCountDown = false;
-                                    cancel = false;
-                                    startButton.setClickable(true);
-                                    startButton.setBackgroundColor(Color.parseColor("#228B22"));
-                                    startButton.setTextColor(Color.WHITE);
-                                }
                             }
 
                             @Override
                             public void onFinish() {
-                                //when resttimer is finished, play a sound
+
                                 i++;
                                 MediaPlayer.create(MainActivity.this, R.raw.beep).start();
-                                //if the amount of rounds is less the 'i' restart the workoutTimer and send a notification
                                 if (i < rounds) {
                                     workoutTimer.start();
-                                    long minutes = (workoutDuration / 60000) % 60;
-                                    long seconds = (workoutDuration / 1000) % 60;
 
                                 } else {
-                                    //if the total rounds has been met, allow the start button to be pressed again
+
                                     i = 0;
                                     restCountDown = false;
                                     startButton.setClickable(true);
@@ -173,12 +147,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 if(workoutCountDown == true) {
                     workoutTimer.cancel();
                     workoutCountDown = false;
+
                 } else if (restCountDown == true) {
                     restTimer.cancel();
                     restCountDown = false;
